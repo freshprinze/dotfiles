@@ -89,6 +89,7 @@ command! -nargs=* -bang RG call RipgrepFzf(<q-args>, <bang>0)
 "#################################################################### ripgrep
 if executable('rg')
     let g:rg_derive_root='true'
+    set grepprg=rg\ --vimgrep\ --smart-case\ --follow
 endif
 
 "#################################################################### vim file browser
