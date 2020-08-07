@@ -22,6 +22,8 @@ set splitright
 set autoread
 set cursorline
 
+let mapleader = "\<Space>"
+
 call plug#begin('~/.vim/plugged')
 
 Plug 'tpope/vim-fugitive'
@@ -48,7 +50,6 @@ Plug 'maxmellon/vim-jsx-pretty'
 " vim
 Plug 'gruvbox-community/gruvbox'
 Plug 'jremmen/vim-ripgrep'
-Plug 'ctrlpvim/ctrlp.vim'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'itchyny/lightline.vim'
@@ -61,20 +62,20 @@ Plug 'ryanoasis/vim-devicons' " -- has to be last
 
 call plug#end()
 
-" gruvbox
+"#################################################################### gruvbox
 let g:gruvbox_contrast_dark = 'hard'
 let g:gruvbox_invert_selection = '0'
 
 colorscheme gruvbox
 set background=dark
 
-" lightline
+"#################################################################### lightline
 set laststatus=2
 
-" devicons
+"#################################################################### devicons
 set guifont=DroidSansMono\ Nerd\ Font\ 11
 
-" fzf
+"#################################################################### fzf
 function! RipgrepFzf(query, fullscreen)
   let command_fmt = 'rg --column --line-number --no-heading --color=always --smart-case -- %s || true'
   let initial_command = printf(command_fmt, shellescape(a:query))
@@ -85,19 +86,12 @@ endfunction
 
 command! -nargs=* -bang RG call RipgrepFzf(<q-args>, <bang>0)
 
-nnoremap <silent> <C-f> :Files<CR>
-nnoremap <silent> rg :RG<CR>
-
-" ripgrep
+"#################################################################### ripgrep
 if executable('rg')
     let g:rg_derive_root='true'
 endif
 
-" ctrlp
-let g:ctrlp_user_command = ['.git', 'cd %s && git ls-files -co --exclude-standard']
-let g:ctrlp_use_caching=0
-
-" vim file browser
+"#################################################################### vim file browser
 let g:netrw_banner=0
 let g:netrw_browse_split=2
 let g:netrw_winsize=25
@@ -105,7 +99,7 @@ let g:netrw_winsize=25
 " indentline
 let g:indentLine_char = '⦙'
 
-" nerdtree
+"#################################################################### nerdtree
 let g:NERDTreeIgnore = ['^node_modules$']
 let g:NERDTreeWinPos = "right"
 let g:NERDTreeQuitOnOpen = 1
@@ -119,7 +113,6 @@ autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isT
 
 "" [start with vim and not vim .] open a NERDTree automatically when vim starts up if no files were specified
 autocmd StdinReadPre * let s:std_in=1
-"autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 
 "" sync open file with NERDTree
 """ Check if NERDTree is open or active
@@ -154,20 +147,8 @@ function! ToggleTree()
   endif
 endfunction
 
-nmap <C-n> :call ToggleTree()<CR>
 
-" ranger
-" let g:ranger_map_keys = 0
-" map <leader>f :Rg<CR>
-
-" nerdcommenter
-nmap <C-_> <Plug>NERDCommenterToggle
-vmap <C-_> <Plug>NERDCommenterToggle<CR>gv
-
-" undotree
-nmap <leader>u :UndotreeShow<CR>
-
-" coc
+"#################################################################### coc
 let g:coc_global_extensions = [
   \ 'coc-tsserver'
   \ ]
@@ -180,6 +161,33 @@ if isdirectory('./node_modules') && isdirectory('./node_modules/eslint')
   let g:coc_global_extensions += ['coc-eslint']
 endif
 
+"" automatically display documentation 
+
+function! ShowDocIfNoDiagnostic(timer_id)
+  if (coc#util#has_float() == 0)
+    silent call CocActionAsync('doHover')
+  endif
+endfunction
+
+function! s:show_hover_doc()
+  call timer_start(500, 'ShowDocIfNoDiagnostic')
+endfunction
+
+autocmd CursorHoldI * :call <SID>show_hover_doc()
+autocmd CursorHold * :call <SID>show_hover_doc()
+
+"" automatically display documentation
+
+"#################################################################### others
+filetype plugin indent on
+
+autocmd FileType yml setlocal ts=2 sts=2 sw=2 expandtab
+autocmd FileType json syntax match Comment +\/\/.\+$+
+autocmd BufEnter *.{js,jsx,ts,tsx} :syntax sync fromstart
+autocmd BufLeave *.{js,jsx,ts,tsx} :syntax sync clear
+
+"#################################################################### keymap
+" coc
 nnoremap <silent> K :call CocAction('doHover')<CR>
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
@@ -191,29 +199,20 @@ nnoremap <silent> <space>s :<C-u>CocList -I symbols<cr>
 nmap <leader>do <Plug>(coc-codeaction)
 nmap <leader>rn <Plug>(coc-rename)
 
-""" automatically display 
-"function! ShowDocIfNoDiagnostic(timer_id)
-  "if (coc#util#has_float() == 0)
-    "silent call CocActionAsync('doHover')
-  "endif
-"endfunction
+" nerdtree
+nmap <C-n> :call ToggleTree()<CR>
 
-"function! s:show_hover_doc()
-  "call timer_start(500, 'ShowDocIfNoDiagnostic')
-"endfunction
+" ranger
+let g:ranger_map_keys = 0
+map <leader>d :Ranger<CR>
 
-"autocmd CursorHoldI * :call <SID>show_hover_doc()
-"autocmd CursorHold * :call <SID>show_hover_doc()
-"""" automatically display
+" fzf
+nnoremap <silent> <C-f> :Files<CR>
+nnoremap <silent> <leader>f :RG<CR>
 
-" general settings
-filetype plugin indent on
+" nerdcommenter
+nmap <C-_> <Plug>NERDCommenterToggle
+vmap <C-_> <Plug>NERDCommenterToggle<CR>gv
 
-" editor
-" autocmd TextChanged,TextChangedI <buffer> silent write " -- auto save
-
-" coding
-autocmd FileType yml setlocal ts=2 sts=2 sw=2 expandtab
-autocmd FileType json syntax match Comment +\/\/.\+$+
-autocmd BufEnter *.{js,jsx,ts,tsx} :syntax sync fromstart
-autocmd BufLeave *.{js,jsx,ts,tsx} :syntax sync clear
+" undotree
+nmap <leader>u :UndotreeShow<CR>
