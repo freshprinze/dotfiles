@@ -100,6 +100,7 @@ set autoread
 set encoding=utf-8
 set laststatus=2
 set ruler
+set foldmethod=indent
 
 set ttyfast
 set mouse=a
@@ -124,7 +125,7 @@ nmap <leader>do <Plug>(coc-codeaction)
 nmap <leader>rn <Plug>(coc-rename)
 
 " nerdtree
-nmap <C-n> :call ToggleTree()<CR>
+nmap <leader>n :call ToggleTree()<CR>
 
 " ranger
 let g:ranger_map_keys = 0
@@ -175,6 +176,12 @@ augroup CursorLine
     au!
     au VimEnter,WinEnter,BufWinEnter * setlocal cursorline
     au WinLeave * setlocal nocursorline
+augroup END
+  
+" Keep all folds open when a file is opened
+augroup OpenAllFoldsOnFileOpen
+    autocmd!
+    autocmd BufRead * normal zR
 augroup END
 
 autocmd FileType yml setlocal ts=2 sts=2 sw=2 expandtab
@@ -274,18 +281,18 @@ if isdirectory('./node_modules') && isdirectory('./node_modules/eslint')
 endif
 
 "" automatically display documentation 
-function! ShowDocIfNoDiagnostic(timer_id)
-  if (coc#util#has_float() == 0)
-    silent call CocActionAsync('doHover')
-  endif
-endfunction
+"function! ShowDocIfNoDiagnostic(timer_id)
+  "if (coc#util#has_float() == 0)
+    "silent call CocActionAsync('doHover')
+  "endif
+"endfunction
 
-function! s:show_hover_doc()
-  call timer_start(500, 'ShowDocIfNoDiagnostic')
-endfunction
+"function! s:show_hover_doc()
+  "call timer_start(500, 'ShowDocIfNoDiagnostic')
+"endfunction
 
-autocmd CursorHoldI * :call <SID>show_hover_doc()
-autocmd CursorHold * :call <SID>show_hover_doc()
+"autocmd CursorHoldI * :call <SID>show_hover_doc()
+"autocmd CursorHold * :call <SID>show_hover_doc()
 "" automatically display documentation
 
 "#################################################################### vimwiki
