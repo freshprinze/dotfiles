@@ -72,8 +72,6 @@ let g:gruvbox_invert_selection = '0'
 colorscheme gruvbox
 set background=dark
 
-
-
 " -----------------------------------------------------------------------------
 " Basic Settings
 "   Research any of these by running :help <setting>
@@ -122,6 +120,15 @@ filetype plugin indent on
 " -----------------------------------------------------------------------------
 " Key Mappings
 " -----------------------------------------------------------------------------
+
+" navigate around splits with a single key combo
+nnoremap <C-l> <C-w><C-l>
+nnoremap <C-h> <C-w><C-h>
+nnoremap <C-k> <C-w><C-k>
+nnoremap <C-j> <C-w><C-j>
+
+" cycle through splits
+nnoremap <S-Tab> <C-w>w
 
 " coc
 nnoremap <silent> K :call CocAction('doHover')<CR>
@@ -245,8 +252,9 @@ let g:netrw_banner=0
 let g:netrw_browse_split=2
 let g:netrw_winsize=25
 
-" indentline
+"#################################################################### indentline
 let g:indentLine_char = '⦙'
+let g:indentLine_setConceal = 1
 
 "#################################################################### nerdtree
 let g:NERDTreeIgnore = ['^node_modules$']
