@@ -331,7 +331,6 @@ let g:vimwiki_list = [{'path': '~/vimwiki/', 'syntax': 'markdown', 'ext': '.md'}
 "#################################################################### vim-markdown
 
 if has("autocmd")
-
   autocmd FileType markdown let b:sleuth_automatic=0
   autocmd FileType markdown set conceallevel=0
   autocmd FileType markdown normal zR
@@ -347,4 +346,9 @@ let g:mkdp_markdown_css='/home/asiri/.local/lib/github-markdown-css/github-markd
 
 "#################################################################### vim-go
 let g:go_def_mapping_enabled = 0
+let g:go_fmt_command = "goimports"    " Run goimports along gofmt on each save     
+let g:go_auto_type_info = 1           " Automatically get signature/type info for object under cursor     
 
+if has("autocmd")
+  au filetype go inoremap <buffer> . .<C-x><C-o>
+endif
