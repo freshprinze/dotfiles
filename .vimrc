@@ -25,6 +25,9 @@ Plug 'pangloss/vim-javascript'
 Plug 'leafgarland/typescript-vim'
 Plug 'maxmellon/vim-jsx-pretty'
 
+" golang
+Plug 'fatih/vim-go'
+
 " vim
 Plug 'gruvbox-community/gruvbox'
 Plug 'tpope/vim-surround'
@@ -69,6 +72,8 @@ let g:gruvbox_invert_selection = '0'
 colorscheme gruvbox
 set background=dark
 
+
+
 " -----------------------------------------------------------------------------
 " Basic Settings
 "   Research any of these by running :help <setting>
@@ -88,9 +93,11 @@ set nowrap
 set noswapfile
 set undodir=~/.vim/undodir
 set undofile
-set hlsearch
-set ignorecase
-set incsearch
+set undolevels=1000         " use many levels of undo
+set history=1000            " remember more commands and search history
+set hlsearch                " highlight search terms
+set ignorecase              " ignore case when searching
+set incsearch               " show search matches as you type
 set noshowmode
 set updatetime=50
 set signcolumn=yes
@@ -99,8 +106,12 @@ set splitright
 set autoread
 set encoding=utf-8
 set laststatus=2
-set ruler
+set ruler                   " display column in status bar
 set foldmethod=indent
+set hidden                  " allows to hide current buffer if there are unsaved changes
+set cmdheight=2             " more space for displaying messages
+set title                   " change terminal title
+set wildignore=*.swp,*.bak,*.pyc,*.class
 
 set ttyfast
 set mouse=a
@@ -142,52 +153,71 @@ vmap <C-_> <Plug>NERDCommenterToggle<CR>gv
 " undotree
 nmap <leader>u :UndotreeShow<CR>
 
-" edit / source vimrc
+" edit / source .vimrc
 map <leader>ev :tabnew $MYVIMRC<CR>
 map <leader>sv :source $MYVIMRC<CR>
 
 " clear search highlights
-map <leader><Space> :let @/=''<CR>
+map <leader><Space> :nohlsearch<CR>
 
 " keep cursor at the bottom of the visual selection after you yank it.
 vmap y ygv<Esc>
+
+" save as sudo [if you forget to open file as sudo]
+cmap w!! w !sudo tee % >/dev/null
 
 " -----------------------------------------------------------------------------
 " Basic autocommands
 " -----------------------------------------------------------------------------
 
-" Auto-resize splits when Vim gets resized.
-autocmd VimResized * wincmd =
+if has("autocmd")
 
-" Update a buffer's contents on focus if it changed outside of Vim.
-au FocusGained,BufEnter * :checktime
+  " Change cursor shape
+  augroup CursorShape
+    au VimEnter,InsertLeave * silent execute '!echo -ne "\e[1 q"' | redraw!
+    au InsertEnter,InsertChange *
+      \ if v:insertmode == 'i' | 
+      \   silent execute '!echo -ne "\e[5 q"' | redraw! |
+      \ elseif v:insertmode == 'r' |
+      \   silent execute '!echo -ne "\e[3 q"' | redraw! |
+      \ endif
+    au VimLeave * silent execute '!echo -ne "\e[ q"' | redraw!
+  augroup END
 
-" Unset paste on InsertLeave.
-autocmd InsertLeave * silent! set nopaste
+  " Only show the cursor line in the active buffer.
+  augroup CursorLine
+      au!
+      au VimEnter,WinEnter,BufWinEnter * setlocal cursorline
+      au WinLeave * setlocal nocursorline
+  augroup END
 
-" Make sure all types of requirements.txt files get syntax highlighting.
-autocmd BufNewFile,BufRead requirements*.txt set syntax=python
+  " Auto-resize splits when Vim gets resized.
+  au VimResized * wincmd =
 
-" Ensure tabs don't get converted to spaces in Makefiles.
-autocmd FileType make setlocal noexpandtab
+  " Update a buffer's contents on focus if it changed outside of Vim.
+  au FocusGained,BufEnter * :checktime
 
-" Only show the cursor line in the active buffer.
-augroup CursorLine
-    au!
-    au VimEnter,WinEnter,BufWinEnter * setlocal cursorline
-    au WinLeave * setlocal nocursorline
-augroup END
-  
-" Keep all folds open when a file is opened
-augroup OpenAllFoldsOnFileOpen
-    autocmd!
-    autocmd BufRead * normal zR
-augroup END
+  " Unset paste on InsertLeave.
+  au InsertLeave * silent! set nopaste
 
-autocmd FileType yml setlocal ts=2 sts=2 sw=2 expandtab
-autocmd FileType json syntax match Comment +\/\/.\+$+
-autocmd BufEnter *.{js,jsx,ts,tsx} :syntax sync fromstart
-autocmd BufLeave *.{js,jsx,ts,tsx} :syntax sync clear
+  " Make sure all types of requirements.txt files get syntax highlighting.
+  au BufNewFile,BufRead requirements*.txt set syntax=python
+
+  " Ensure tabs don't get converted to spaces in Makefiles.
+  au FileType make setlocal noexpandtab
+
+  " Keep all folds open when a file is opened
+  augroup OpenAllFoldsOnFileOpen
+      au!
+      au BufRead * normal zR
+  augroup END
+
+  au FileType yml setlocal ts=2 sts=2 sw=2 expandtab
+  au FileType json syntax match Comment +\/\/.\+$+
+  au BufEnter *.{js,jsx,ts,tsx} :syntax sync fromstart
+  au BufLeave *.{js,jsx,ts,tsx} :syntax sync clear
+
+endif
 
 " -----------------------------------------------------------------------------
 " Plugin settings, mappings and autocommands
@@ -299,9 +329,13 @@ endif
 let g:vimwiki_list = [{'path': '~/vimwiki/', 'syntax': 'markdown', 'ext': '.md'}]
 
 "#################################################################### vim-markdown
-autocmd FileType markdown let b:sleuth_automatic=0
-autocmd FileType markdown set conceallevel=0
-autocmd FileType markdown normal zR
+
+if has("autocmd")
+
+  autocmd FileType markdown let b:sleuth_automatic=0
+  autocmd FileType markdown set conceallevel=0
+  autocmd FileType markdown normal zR
+endif
 
 let g:vim_markdown_frontmatter=1
 
@@ -310,4 +344,7 @@ let g:mkdp_auto_close=0
 let g:mkdp_refresh_slow=1
 " copied css from https://github.com/sindresorhus/github-markdown-css/blob/gh-pages/github-markdown.css
 let g:mkdp_markdown_css='/home/asiri/.local/lib/github-markdown-css/github-markdown.css'
+
+"#################################################################### vim-go
+let g:go_def_mapping_enabled = 0
 
